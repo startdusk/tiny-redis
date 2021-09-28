@@ -7,8 +7,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/peterh/liner"
+
+	redis "github.com/startdusk/tiny-redis"
 )
 
 var (
@@ -17,6 +20,10 @@ var (
 )
 
 func main() {
+	defaultExpiration, _ := time.ParseDuration("0.5h")
+	gcInterval, _ := time.ParseDuration("3s")
+	cache := redis.NewCache(defaultExpiration, gcInterval)
+
 	line := liner.NewLiner()
 	defer line.Close()
 
@@ -51,7 +58,28 @@ func main() {
 		} else if strings.ToLower(command) == "help" {
 			printHelper()
 		} else {
-			log.Print("Got command: ", command)
+			cmd := strings.Fields(command)
+			switch cmd[0] {
+			case "set":
+				if len(cmd) < 4 {
+					cache.Set(cmd[1], cmd[2], redis.NoExpiration)
+				} else {
+					expiration, err := time.ParseDuration(cmd[3])
+					if err != nil {
+						fmt.Println("Error time")
+						break
+					}
+					cache.Set(cmd[1], cmd[2], expiration)
+				}
+				fmt.Println("OK")
+			case "get":
+				key := cmd[1]
+				if v, ok := cache.Get(key); ok {
+					fmt.Println(v)
+				} else {
+					fmt.Println("Not found key", key)
+				}
+			}
 			line.AppendHistory(command)
 		}
 	}
