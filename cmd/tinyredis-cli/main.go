@@ -79,6 +79,19 @@ func main() {
 				} else {
 					fmt.Println("Not found key", key)
 				}
+			case "delete":
+				key := cmd[1]
+				if _, ok := cache.Get(key); ok {
+					cache.Delete(key)
+					fmt.Printf("Delete key: %v successfully\n", key)
+				} else {
+					fmt.Println("Not found key", key)
+				}
+			case "all":
+				all := cache.All()
+				for k, v := range all {
+					fmt.Printf("The key %v is: %v \n", k, v.Value())
+				}
 			}
 			line.AppendHistory(command)
 		}

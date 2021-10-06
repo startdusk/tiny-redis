@@ -24,6 +24,10 @@ func (i Item) Expired() bool {
 	return false
 }
 
+func (i Item) Value() interface{} {
+	return i.object
+}
+
 type Cache struct {
 	defaultExpiration time.Duration
 	items             map[string]Item
@@ -54,6 +58,23 @@ func (c *Cache) Get(k string) (interface{}, bool) {
 	}
 
 	return item.object, true
+}
+
+func (c *Cache) Delete(k string) {
+	c.mu.Lock()
+	delete(c.items, k)
+	c.mu.Unlock()
+}
+
+func (c *Cache) All() map[string]Item {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	all := make(map[string]Item, len(c.items))
+	for k, v := range c.items {
+		all[k] = v
+	}
+	return all
 }
 
 func NewCache(defaultExpiration, gcInterval time.Duration) *Cache {
