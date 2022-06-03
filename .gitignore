@@ -15,3 +15,5 @@
 # vendor/
 
 docs/
+.vscode/
+logs/
