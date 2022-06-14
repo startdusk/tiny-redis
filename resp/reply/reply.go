@@ -35,6 +35,10 @@ func NewMultiBulkReply(args [][]byte) *MultiBulkReply {
 	return &MultiBulkReply{args: args}
 }
 
+func (r *MultiBulkReply) Args() [][]byte {
+	return r.args
+}
+
 func (r *MultiBulkReply) Bytes() []byte {
 	var buf bytes.Buffer
 	buf.WriteString("*" + strconv.Itoa(len(r.args)) + CRLF)

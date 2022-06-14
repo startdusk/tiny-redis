@@ -6,7 +6,9 @@ import (
 	"os"
 
 	"github.com/startdusk/tiny-redis/config"
+	"github.com/startdusk/tiny-redis/db"
 	"github.com/startdusk/tiny-redis/lib/logger"
+	"github.com/startdusk/tiny-redis/resp/handler"
 	"github.com/startdusk/tiny-redis/tcp"
 )
 
@@ -24,7 +26,7 @@ func fileExists(filename string) bool {
 }
 
 // using telnet for test tcp server
-// $ telnet localhost 6379
+// ```$ telnet localhost 6379```
 // and send message
 // and quit
 // ctrl + [ and enter input `quit`
@@ -44,7 +46,7 @@ func main() {
 
 	if err := tcp.ListenAndServeWithSignal(&tcp.Config{
 		Address: net.JoinHostPort(config.Properties.Bind, fmt.Sprintf("%d", config.Properties.Port)),
-	}, &tcp.EchoHandler{}); err != nil {
+	}, handler.NewHandler(&db.EchoDB{})); err != nil {
 		logger.Error(err)
 	}
 }

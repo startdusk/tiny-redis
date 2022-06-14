@@ -160,10 +160,13 @@ func readLine(bufReader *bufio.Reader, state *readState) ([]byte, bool, error) {
 		// read end
 		state.bulkLen = 0
 	}
-	return msg[:len(msg)-2], false, nil
+	return msg, false, nil
 }
 
 func parseMultiBulkHeader(msg []byte, state *readState) error {
+	if len(msg) < 4 {
+		return errors.New("protocol error: " + string(msg))
+	}
 	// extract number
 	// *3\r\n
 	// $3\r\n
@@ -188,6 +191,11 @@ func parseMultiBulkHeader(msg []byte, state *readState) error {
 
 // example: $4\r\nPING\r\n
 func parseBulkHeader(msg []byte, state *readState) (err error) {
+	// extract number
+	// example: $4\r\nPING\r\n
+	if len(msg) < 4 {
+		return errors.New("protocol error: " + string(msg))
+	}
 	state.bulkLen, err = strconv.ParseInt(string(msg[1:len(msg)-2]), 10, 64)
 	if err != nil {
 		return errors.New("protocol error: " + string(msg))

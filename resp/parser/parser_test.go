@@ -18,6 +18,11 @@ func TestReadLine(t *testing.T) {
 			line:     "*3\r\n",
 			expected: "*3",
 		},
+		{
+			name:     "starts with $",
+			line:     "$3\r\n",
+			expected: "$3",
+		},
 	}
 
 	for _, c := range cases {

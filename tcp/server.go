@@ -18,7 +18,7 @@ type Config struct {
 
 func ListenAndServeWithSignal(cfg *Config, handler tcp.Handler) error {
 	closeCh := make(chan struct{})
-	sigCh := make(chan os.Signal)
+	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		sig := <-sigCh
@@ -47,7 +47,7 @@ func ListenAndServe(lis net.Listener, handler tcp.Handler, closeCh <-chan struct
 		lis.Close()
 		handler.Close()
 	}()
-	
+
 	ctx := context.Background()
 	var wg sync.WaitGroup
 	for {
