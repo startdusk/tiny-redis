@@ -44,9 +44,12 @@ func main() {
 		config.Properties = defaultProp
 	}
 
-	if err := tcp.ListenAndServeWithSignal(&tcp.Config{
-		Address: net.JoinHostPort(config.Properties.Bind, fmt.Sprintf("%d", config.Properties.Port)),
-	}, handler.NewHandler(&db.EchoDB{})); err != nil {
+	if err := tcp.ListenAndServeWithSignal(
+		&tcp.Config{
+			Address: net.JoinHostPort(config.Properties.Bind, fmt.Sprintf("%d", config.Properties.Port)),
+		}, handler.NewHandler(
+			db.NewDatabase(
+				config.Properties.Databases))); err != nil {
 		logger.Error(err)
 	}
 }

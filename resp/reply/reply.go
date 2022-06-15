@@ -65,10 +65,10 @@ func (r *StatusReply) Bytes() []byte {
 }
 
 type NumberReply struct {
-	code int
+	code int64
 }
 
-func NewNumberReply(code int) *NumberReply {
+func NewNumberReply(code int64) *NumberReply {
 	return &NumberReply{code: code}
 }
 

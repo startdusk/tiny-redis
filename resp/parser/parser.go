@@ -231,7 +231,7 @@ func parseSingleLineReply(msg []byte) (resp.Reply, error) {
 		if err != nil {
 			return nil, errors.New("protocol error: " + msgStr)
 		}
-		return reply.NewNumberReply(int(val)), nil
+		return reply.NewNumberReply(val), nil
 	default:
 		return nil, errors.New("protocol error: " + msgStr)
 	}
