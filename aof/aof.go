@@ -1,12 +1,16 @@
 package aof
 
 import (
+	"errors"
+	"io"
 	"os"
 	"strconv"
 
 	"github.com/startdusk/tiny-redis/api/db"
 	"github.com/startdusk/tiny-redis/lib/logger"
 	"github.com/startdusk/tiny-redis/lib/utils"
+	"github.com/startdusk/tiny-redis/resp/conn"
+	"github.com/startdusk/tiny-redis/resp/parser"
 	"github.com/startdusk/tiny-redis/resp/reply"
 )
 
@@ -53,7 +57,37 @@ func (h *Handler) Add(dbIndex int, cmdLine CmdLine) {
 }
 
 func (h *Handler) Load() {
+	file, err := os.Open(h.filename)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	defer file.Close()
+	stream := parser.ParseStream(file)
+	fakeConn := &conn.Conn{}
+	for p := range stream {
+		if p.Err != nil {
+			if errors.Is(p.Err, io.EOF) {
+				break
+			}
+			logger.Error(err)
+			continue
+		}
+		if p.Data == nil {
+			logger.Error("empty payload")
+			continue
+		}
+		r, ok := p.Data.(*reply.MultiBulkReply)
+		if !ok {
+			logger.Error("need multi bulk")
+			continue
+		}
 
+		rly := h.db.Exec(fakeConn, r.Args())
+		if reply.IsErrRely(rly) {
+			logger.Error(rly)
+		}
+	}
 }
 
 func (h *Handler) handle() {
