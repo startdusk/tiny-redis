@@ -4,8 +4,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/startdusk/tiny-redis/aof"
 	"github.com/startdusk/tiny-redis/api/resp"
 	"github.com/startdusk/tiny-redis/lib/logger"
+	"github.com/startdusk/tiny-redis/model/dict"
 	"github.com/startdusk/tiny-redis/resp/reply"
 )
 
@@ -13,9 +15,11 @@ const defaultDBNums = 16
 
 type Database struct {
 	dbSet []*DB
+
+	aof *aof.Handler
 }
 
-func NewDatabase(dbNum int) *Database {
+func NewDatabase(dbNum int, aofFilename string, appendOnly bool) *Database {
 	if dbNum <= 0 {
 		dbNum = defaultDBNums
 	}
@@ -23,7 +27,24 @@ func NewDatabase(dbNum int) *Database {
 		dbSet: make([]*DB, dbNum),
 	}
 	for i := 0; i < dbNum; i++ {
-		db.dbSet[i] = NewDB(i)
+		db.dbSet[i] = &DB{
+			index:  i,
+			data:   dict.NewSyncDict(),
+			addAOF: func(cl CmdLine) {},
+		}
+	}
+	if appendOnly {
+		h, err := aof.NewAOFHandler(&db, aofFilename, appendOnly)
+		if err != nil {
+			panic(err)
+		}
+		db.aof = h
+		for i := 0; i < dbNum; i++ {
+			index := i
+			db.dbSet[i].addAOF = func(cmdLine CmdLine) {
+				db.aof.Add(index, cmdLine)
+			}
+		}
 	}
 	return &db
 }

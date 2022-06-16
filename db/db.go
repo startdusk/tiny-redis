@@ -10,20 +10,14 @@ import (
 )
 
 type DB struct {
-	index int
-	data  dict.Dict
+	index  int
+	data   dict.Dict
+	addAOF func(CmdLine)
 }
 
 type ExecFunc func(db *DB, args [][]byte) resp.Reply
 
 type CmdLine = [][]byte
-
-func NewDB(index int) *DB {
-	return &DB{
-		index: index,
-		data:  dict.NewSyncDict(),
-	}
-}
 
 func (d *DB) Exec(c resp.Connection, cmdLine CmdLine) resp.Reply {
 	if len(cmdLine) == 0 {

@@ -19,3 +19,4 @@ docs/
 logs/
 
 readme.txt
+appendonly.aof

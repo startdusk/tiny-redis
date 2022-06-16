@@ -3,6 +3,7 @@ package db
 import (
 	dbent "github.com/startdusk/tiny-redis/api/db"
 	"github.com/startdusk/tiny-redis/api/resp"
+	"github.com/startdusk/tiny-redis/lib/utils"
 	"github.com/startdusk/tiny-redis/resp/reply"
 )
 
@@ -28,6 +29,7 @@ func execSet(db *DB, args [][]byte) resp.Reply {
 		Data: args[1],
 	}
 	db.PutEntity(key, entity)
+	db.addAOF(utils.ToCmdLineWithCmdName("set", args...))
 	return reply.NewOKReply()
 }
 
@@ -38,6 +40,7 @@ func execSetNX(db *DB, args [][]byte) resp.Reply {
 		Data: args[1],
 	}
 	res := db.PutIfAbsent(key, entity)
+	db.addAOF(utils.ToCmdLineWithCmdName("setnx", args...))
 	return reply.NewNumberReply(int64(res))
 }
 
@@ -50,6 +53,8 @@ func execGetSet(db *DB, args [][]byte) resp.Reply {
 		Data: args[1],
 	}
 	db.PutEntity(key, entity)
+
+	db.addAOF(utils.ToCmdLineWithCmdName("getset", args...))
 	if exists {
 		return reply.NewBulkReply(old.Data.([]byte))
 	}
