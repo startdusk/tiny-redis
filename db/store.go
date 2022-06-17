@@ -7,8 +7,8 @@ import (
 	"github.com/startdusk/tiny-redis/aof"
 	"github.com/startdusk/tiny-redis/api/resp"
 	"github.com/startdusk/tiny-redis/lib/logger"
-	"github.com/startdusk/tiny-redis/model/dict"
 	"github.com/startdusk/tiny-redis/resp/reply"
+	"github.com/startdusk/tiny-redis/structrue/dict"
 )
 
 const defaultDBNums = 16

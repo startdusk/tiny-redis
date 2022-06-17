@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/startdusk/tiny-redis/api/db"
+	"github.com/startdusk/tiny-redis/lib/conv"
 	"github.com/startdusk/tiny-redis/lib/logger"
-	"github.com/startdusk/tiny-redis/lib/utils"
 	"github.com/startdusk/tiny-redis/resp/conn"
 	"github.com/startdusk/tiny-redis/resp/parser"
 	"github.com/startdusk/tiny-redis/resp/reply"
@@ -99,7 +99,7 @@ func (h *Handler) handle() {
 
 	for p := range h.payloadCh {
 		if p.dbIndex != h.currentDB {
-			r := reply.NewMultiBulkReply(utils.ToCmdLine("select", strconv.Itoa(p.dbIndex)))
+			r := reply.NewMultiBulkReply(conv.ToCmdLine("select", strconv.Itoa(p.dbIndex)))
 			_, err := h.file.Write(r.Bytes())
 			if err != nil {
 				logger.Error(err)

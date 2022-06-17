@@ -5,8 +5,8 @@ import (
 
 	"github.com/startdusk/tiny-redis/api/db"
 	"github.com/startdusk/tiny-redis/api/resp"
-	"github.com/startdusk/tiny-redis/model/dict"
 	"github.com/startdusk/tiny-redis/resp/reply"
+	"github.com/startdusk/tiny-redis/structrue/dict"
 )
 
 type DB struct {

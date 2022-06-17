@@ -1,4 +1,4 @@
-package utils
+package conv
 
 // ToCmdLine convert strings to [][]byte
 func ToCmdLine(cmds ...string) [][]byte {

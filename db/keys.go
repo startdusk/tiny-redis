@@ -2,7 +2,7 @@ package db
 
 import (
 	"github.com/startdusk/tiny-redis/api/resp"
-	"github.com/startdusk/tiny-redis/lib/utils"
+	"github.com/startdusk/tiny-redis/lib/conv"
 	"github.com/startdusk/tiny-redis/lib/wildcard"
 	"github.com/startdusk/tiny-redis/resp/reply"
 )
@@ -15,7 +15,7 @@ func execDel(db *DB, args [][]byte) resp.Reply {
 	}
 	deleted := db.Removes(keys...)
 	if deleted > 0 {
-		db.addAOF(utils.ToCmdLineWithCmdName("del", args...))
+		db.addAOF(conv.ToCmdLineWithCmdName("del", args...))
 	}
 	return reply.NewNumberReply(int64(deleted))
 }
@@ -36,7 +36,7 @@ func execExists(db *DB, args [][]byte) resp.Reply {
 // FLUSHDB
 func execFlushDB(db *DB, args [][]byte) resp.Reply {
 	db.Flush()
-	db.addAOF(utils.ToCmdLineWithCmdName("flushdb", args...))
+	db.addAOF(conv.ToCmdLineWithCmdName("flushdb", args...))
 	return reply.NewOKReply()
 }
 
@@ -66,7 +66,7 @@ func execRename(db *DB, args [][]byte) resp.Reply {
 	}
 	db.PutEntity(dst, entity)
 	db.Remove(src)
-	db.addAOF(utils.ToCmdLineWithCmdName("rename", args...))
+	db.addAOF(conv.ToCmdLineWithCmdName("rename", args...))
 	return reply.NewOKReply()
 }
 
@@ -85,7 +85,7 @@ func execRenameNX(db *DB, args [][]byte) resp.Reply {
 	}
 	db.PutEntity(dst, entity)
 	db.Remove(src)
-	db.addAOF(utils.ToCmdLineWithCmdName("renamenx", args...))
+	db.addAOF(conv.ToCmdLineWithCmdName("renamenx", args...))
 	return reply.NewNumberReply(1)
 }
 
