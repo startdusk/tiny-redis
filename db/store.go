@@ -13,17 +13,17 @@ import (
 
 const defaultDBNums = 16
 
-type Database struct {
+type StandaloneDatabase struct {
 	dbSet []*DB
 
 	aof *aof.Handler
 }
 
-func NewDatabase(dbNum int, aofFilename string, appendOnly bool) *Database {
+func NewStandaloneDatabase(dbNum int, aofFilename string, appendOnly bool) *StandaloneDatabase {
 	if dbNum <= 0 {
 		dbNum = defaultDBNums
 	}
-	db := Database{
+	db := StandaloneDatabase{
 		dbSet: make([]*DB, dbNum),
 	}
 	for i := 0; i < dbNum; i++ {
@@ -49,7 +49,7 @@ func NewDatabase(dbNum int, aofFilename string, appendOnly bool) *Database {
 	return &db
 }
 
-func (d *Database) Exec(client resp.Connection, args [][]byte) resp.Reply {
+func (d *StandaloneDatabase) Exec(client resp.Connection, args [][]byte) resp.Reply {
 	defer func() {
 		if err := recover(); err != nil {
 			logger.Error(err)
@@ -70,16 +70,16 @@ func (d *Database) Exec(client resp.Connection, args [][]byte) resp.Reply {
 	}
 }
 
-func (d *Database) Close() error {
+func (d *StandaloneDatabase) Close() error {
 	return nil
 }
 
-func (d *Database) AfterClientClose(c resp.Connection) error {
+func (d *StandaloneDatabase) AfterClientClose(c resp.Connection) error {
 	return nil
 }
 
 // select n
-func execSelect(c resp.Connection, db *Database, args [][]byte) resp.Reply {
+func execSelect(c resp.Connection, db *StandaloneDatabase, args [][]byte) resp.Reply {
 	index, err := strconv.Atoi(string(args[0]))
 	if err != nil {
 		return reply.NewStandardErrReply("ERR invalid DB index")

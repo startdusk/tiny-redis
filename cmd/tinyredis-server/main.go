@@ -48,7 +48,7 @@ func main() {
 		&tcp.Config{
 			Address: net.JoinHostPort(config.Properties.Bind, fmt.Sprintf("%d", config.Properties.Port)),
 		}, handler.NewHandler(
-			db.NewDatabase(
+			db.NewStandaloneDatabase(
 				config.Properties.Databases,
 				config.Properties.AppendFilename,
 				config.Properties.AppendOnly))); err != nil {
