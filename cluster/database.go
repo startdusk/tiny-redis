@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"context"
+	"strings"
 
 	pool "github.com/jolestar/go-commons-pool"
 	"github.com/startdusk/tiny-redis/api/db"
@@ -9,6 +10,8 @@ import (
 	"github.com/startdusk/tiny-redis/config"
 	database "github.com/startdusk/tiny-redis/db"
 	"github.com/startdusk/tiny-redis/lib/consistenthash"
+	"github.com/startdusk/tiny-redis/lib/logger"
+	"github.com/startdusk/tiny-redis/resp/reply"
 )
 
 type Database struct {
@@ -36,7 +39,7 @@ func NewDatabase() *Database {
 	cluster.peerPicker.Add(nodes...)
 	ctx := context.Background()
 	for _, peer := range config.Properties.Peers {
-		pool.NewObjectPoolWithDefaultConfig(
+		cluster.peerConns[peer] = pool.NewObjectPoolWithDefaultConfig(
 			ctx, &connection{
 				Peer: peer,
 			})
@@ -44,14 +47,30 @@ func NewDatabase() *Database {
 	return &cluster
 }
 
-func (d *Database) Exec(client resp.Connection, args [][]byte) resp.Reply {
-	panic("not implemented") // TODO: Implement
+type CmdFunc func(cluster *Database, c resp.Connection, cmdArgs [][]byte) resp.Reply
+
+var router = NewRouter()
+
+func (d *Database) Exec(client resp.Connection, args [][]byte) (result resp.Reply) {
+	defer func() {
+		if err := recover(); err != nil {
+			logger.Error(err)
+			result = reply.NewUnknowErrReply()
+		}
+	}()
+	cmdName := strings.ToLower(string(args[0]))
+	cmdFunc, ok := router[cmdName]
+	if !ok {
+		return reply.NewStandardErrReply("not supported command " + cmdName)
+	}
+
+	return cmdFunc(d, client, args)
 }
 
 func (d *Database) Close() error {
-	panic("not implemented") // TODO: Implement
+	return d.db.Close()
 }
 
 func (d *Database) AfterClientClose(c resp.Connection) error {
-	panic("not implemented") // TODO: Implement
+	return d.db.AfterClientClose(c)
 }

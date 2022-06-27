@@ -65,15 +65,15 @@ func (r *StatusReply) Bytes() []byte {
 }
 
 type NumberReply struct {
-	code int64
+	Code int64
 }
 
 func NewNumberReply(code int64) *NumberReply {
-	return &NumberReply{code: code}
+	return &NumberReply{Code: code}
 }
 
 func (r *NumberReply) Bytes() []byte {
-	return []byte(":" + strconv.FormatInt(int64(r.code), 10) + CRLF)
+	return []byte(":" + strconv.FormatInt(int64(r.Code), 10) + CRLF)
 }
 
 type ErrorReply interface {

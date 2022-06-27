@@ -5,6 +5,8 @@ import (
 	"net"
 	"os"
 
+	database "github.com/startdusk/tiny-redis/api/db"
+	"github.com/startdusk/tiny-redis/cluster"
 	"github.com/startdusk/tiny-redis/config"
 	"github.com/startdusk/tiny-redis/db"
 	"github.com/startdusk/tiny-redis/lib/logger"
@@ -44,14 +46,20 @@ func main() {
 		config.Properties = defaultProp
 	}
 
+	var store database.Database
+	if config.Properties.Self != "" && len(config.Properties.Peers) > 0 {
+		store = cluster.NewDatabase()
+	} else {
+		store = db.NewStandaloneDatabase(
+			config.Properties.Databases,
+			config.Properties.AppendFilename,
+			config.Properties.AppendOnly)
+	}
+
 	if err := tcp.ListenAndServeWithSignal(
 		&tcp.Config{
 			Address: net.JoinHostPort(config.Properties.Bind, fmt.Sprintf("%d", config.Properties.Port)),
-		}, handler.NewHandler(
-			db.NewStandaloneDatabase(
-				config.Properties.Databases,
-				config.Properties.AppendFilename,
-				config.Properties.AppendOnly))); err != nil {
+		}, handler.NewHandler(store)); err != nil {
 		logger.Error(err)
 	}
 }
